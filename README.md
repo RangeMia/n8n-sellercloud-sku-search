@@ -2,7 +2,8 @@
 
 A reusable n8n sub-workflow for searching and validating SKUs in SellerCloud. Perfect for automation workflows that need to verify product existence before proceeding with operations.
 
-<img width="2020" height="500" alt="image" src="https://github.com/user-attachments/assets/beb474ce-6850-4049-85bf-fc9e4780831b" />
+<img width="2020" height="500" alt="Screenshot 2026-02-04 223652" src="https://github.com/user-attachments/assets/2ec83c68-ed89-4593-9f5c-0b500c110782" />
+
 
 ## Use Cases
 
@@ -77,7 +78,8 @@ This workflow is designed to be called from other workflows using the **Execute 
 ```
 Trigger → Execute Workflow (this SKU search) → IF condition → Continue processing
 ```
-<img width="1668" height="613" alt="image" src="https://github.com/user-attachments/assets/7f884659-d52f-49b9-959b-93c90686f817" />
+<img width="1669" height="614" alt="Screenshot 2026-02-04 224857" src="https://github.com/user-attachments/assets/95d207f1-7f94-48c7-963f-65036c2b114b" />
+
 
 ### Standalone Testing
 
