@@ -1,0 +1,265 @@
+{
+  "name": "Seller Cloud SKU search n8n",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Search SKU Sub Workflow for Seller Cloud\n",
+        "height": 352,
+        "width": 1568,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        128
+      ],
+      "typeVersion": 1,
+      "id": "6aeaebb2-c195-49af-aaf0-218f5af2b88e",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assume this Function runs after the SellerCloud HTTP node\nconst total = $json.TotalResults || 0;\nconst hasResults = total > 0;\nconst firstItem = hasResults ? $json.Items[0] : {};\n\nreturn {\n  json: {\n    sku: $json.Input || firstItem.ID || null,\n    productName: firstItem.ProductName || null,\n    existsInSellerCloud: hasResults\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        208
+      ],
+      "id": "fa80ed51-3379-487a-834d-9e304f0975da",
+      "name": "Return Data1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        288,
+        192
+      ],
+      "id": "c02473f5-f4ee-4951-800b-6d988ddc1a71",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c430d10a-e32d-4d65-9eed-fe8684f3df0e",
+              "name": "Input",
+              "value": "SellerCloud's SKU",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        192
+      ],
+      "id": "e5c789bb-8941-4ce2-b3f5-559ce4753e37",
+      "name": "Input SKU"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://Your Company Name Here.api.sellercloud.us/rest/api/token",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"Username\": \"Your Seller Cloud Email\",\n  \"Password\": \"Your Password Here\"\n}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        704,
+        288
+      ],
+      "id": "d47065c6-d53e-4e56-9463-4f92d8e937c2",
+      "name": "Seller Cloud Token Credentials"
+    },
+    {
+      "parameters": {
+        "url": "=https://Your Company Name Here.api.sellercloud.us/rest/api/Catalog/GetProductsInView",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "model.SKU",
+              "value": "={{ $json.Input }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.body.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1072,
+        208
+      ],
+      "id": "428e94fa-2fcc-45fd-9e5f-1b984cad413b",
+      "name": "SKU Results",
+      "notes": "={{ $json.Input }}"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2a4e610b-14c0-45fb-b1c4-3f952515b870",
+              "leftValue": "={{ $json.Items[0].ID }}",
+              "rightValue": "={{ $('Merge1').item.json.Input }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1248,
+        208
+      ],
+      "id": "1b78a8fc-317c-45ae-a5fc-a2799fd7df3b",
+      "name": "IF yes or no -> still return"
+    },
+    {
+      "parameters": {
+        "mode": "combineBySql",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        896,
+        208
+      ],
+      "id": "c5cb5096-c845-48c0-9cbe-05e374064aaf",
+      "name": "Merge1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Input SKU",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input SKU": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Seller Cloud Token Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seller Cloud Token Credentials": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "SKU Results": {
+      "main": [
+        [
+          {
+            "node": "IF yes or no -> still return",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF yes or no -> still return": {
+      "main": [
+        [
+          {
+            "node": "Return Data1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "SKU Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b716e58d-21ff-4b35-9d55-bb5b9641f52e",
+  "meta": {
+    "instanceId": "a12f11db746770dc21e5d28771ecd235a508af41e190e4b16a5d98af7539bb9b"
+  },
+  "id": "PvhQr9_cdrjju5SGqi-C7",
+  "tags": []
+}
